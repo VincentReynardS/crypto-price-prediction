@@ -8,10 +8,14 @@ def main(
         kafka_topic: str,
         kraken_api: KrakenWebsocketAPI | KrakenMockAPI,
 ):
+    
+    # Initialize the Quix Streams application
+    # This class handles all the low-level details to connect to Kafka
     app = Application(
         broker_address=kafka_broker_address,
     )
 
+    # This lines defines the Kafka topic that we will produce messages to
     topic = app.topic(name=kafka_topic, value_serializer="json")
 
     with app.get_producer() as producer:
@@ -31,8 +35,8 @@ if __name__ == "__main__":
 
     from config import config
 
-    kraken_api = KrakenWebsocketAPI(pairs=config.pairs,
-                                    )
+    # Initialize the Kraken API
+    kraken_api = KrakenWebsocketAPI(pairs=config.pairs)
 
     main(
         kafka_broker_address=config.kafka_broker_address,
