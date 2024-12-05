@@ -11,7 +11,7 @@ class Trade(BaseModel):
     pair: str
     volume: float
     price: float
-    timestamp: datetime
+    timestamp: str
     timestamp_ms: int
 
     @classmethod
@@ -35,3 +35,6 @@ class Trade(BaseModel):
     def to_str(self) -> str:
         # Pydantic method to convert the model into a dict
         return self.model_dump_json()
+
+    def to_dict(self) -> str:
+        return self.model_dump()
