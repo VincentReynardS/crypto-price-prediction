@@ -4,6 +4,9 @@ start-redpanda:
 stop-redpanda:
 	docker compose -f redpanda.yml down
 
+add-one-partition-to-trades-topic:
+	docker compose -f redpanda.yml exec redpanda rpk topic add-partitions trades --num 1
+
 # Technical indicators pipeline management
 build-technical-indicators-pipeline:
 	docker compose -f technical-indicators-pipeline.yml build
