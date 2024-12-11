@@ -85,6 +85,7 @@ def main(
     )
     output_topic = app.topic(name=kafka_output_topic, value_serializer='json')
 
+    # Create a streaming dataframe from the input topic
     sdf = app.dataframe(topic=input_topic)
 
     sdf = (
@@ -96,10 +97,10 @@ def main(
 
     if emit_incomplete_candles:
         # Emit all intermediate candles to make the system more responsive
-        sdf.current()
+        sdf = sdf.current()
     else:
         # Emit only the final candle
-        sdf.final()
+        sdf = sdf.final()
 
     # Extract open, high, low, close, volume, timestamp_ms, pair from the dataframe
     sdf['open'] = sdf['value']['open']
