@@ -29,6 +29,8 @@ def init_candle(trade: dict) -> dict:
         'low': trade['price'],
         'close': trade['price'],
         'volume': trade['volume'],
+        'timestamp_ms': trade['timestamp_ms'],
+        'pair': trade['pair'],
     }
 
 
@@ -40,6 +42,8 @@ def update_candle(candle: dict, trade: dict) -> dict:
     candle['high'] = max(candle['high'], trade['price'])
     candle['low'] = min(candle['low'], trade['price'])
     candle['volume'] += trade['volume']
+    candle['timestamp_ms'] = trade['timestamp_ms']
+    candle['pair'] = trade['pair']
     return candle
 
 
@@ -124,6 +128,8 @@ def main(
             'window_end_ms',
         ]
     ]
+
+    sdf['candle_seconds'] = candle_seconds
 
     sdf = sdf.update(lambda value: logger.info(f'Candle: {value}'))
 
