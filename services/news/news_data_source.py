@@ -1,108 +1,58 @@
-from typing import List, Tuple
+from time import sleep
+from typing import Optional
 
-import requests
-from loguru import logger
-from pydantic import BaseModel
-
-
-class News(BaseModel):
-    """
-    This is the data model for the news.
-    """
-
-    title: str
-    published_at: str
-    source: str
-
-    # Challenge: You can also keep the URL and scrape it to get even more context
-    # about this piece of news.
-
-    def to_dict(self) -> dict:
-        return self.model_dump()
+from news_downloader import NewsDownloader
+from quixstreams.sources.base import StatefulSource
 
 
-class NewsDownloader:
-    """
-    This class is used to download news from the Cryptopanic API.
-    """
-
-    URL = 'https://cryptopanic.com/api/free/v1/posts/'
-
+class NewsDataSource(StatefulSource):
     def __init__(
         self,
-        cryptopanic_api_key: str,
+        news_downloader: NewsDownloader,
+        polling_interval_sec: Optional[int] = 10,
     ):
-        self.cryptopanic_api_key = cryptopanic_api_key
-        # logger.debug(f"Cryptopanic API key: {self.cryptopanic_api_key}")
-        # self._last_published_at = None
+        super().__init__(name='news_data_source')
+        self.news_downloader = news_downloader
+        self.polling_interval_sec = polling_interval_sec
 
-    def get_news(self) -> List[News]:
-        """
-        Keeps on calling _get_batch_of_news until it gets an empty list.
-        """
-        news = []
-        url = self.URL + '?auth_token=' + self.cryptopanic_api_key
+    def run(self):
+        last_published_at = self.state.get('last_published_at', None)
 
-        while True:
-            # logger.debug(f"Fetching news from {url}")
-            batch_of_news, next_url = self._get_batch_of_news(url)
-            news += batch_of_news
-            logger.debug(f'Fetched {len(batch_of_news)} news items')
+        while self.running:
+            # download news
+            # the output is sorted by published_at in increasing order
+            news = self.news_downloader.get_news()
 
-            if not batch_of_news:
-                break
-            if not next_url:
-                logger.debug('No next URL found, breaking')
-                break
+            # keep only the news that was published after the last published news
+            if last_published_at is not None:
+                news = [
+                    news_item
+                    for news_item in news
+                    if news_item.published_at > last_published_at
+                ]
 
-            url = next_url
+            # produce news
+            for news_item in news:
+                # serialize the news item as bytes
+                message = self.serialize(
+                    key='news',
+                    value=news_item.to_dict(),
+                )
+                # push the serialized news item to the topic
+                self.produce(
+                    key=message.key,
+                    value=message.value,
+                )
 
-        # sort the news by published_at
-        news.sort(key=lambda x: x.published_at, reverse=False)
+            # update the last published news
+            if news:
+                last_published_at = news[-1].published_at
 
-        return news
+            # update the state
+            self.state.set('last_published_at', last_published_at)
 
-    def _get_batch_of_news(self, url: str) -> Tuple[List[News], str]:
-        """
-        Connects to the Cryptopanic API and fetches one batch of news
+            # flush the state
+            self.flush()
 
-        Args:
-            url: The URL to fetch the news from.
-
-        Returns:
-            A tuple containing the list of news and the next URL to fetch from.
-        """
-        response = requests.get(url)
-
-        try:
-            response = response.json()
-        except Exception as e:
-            logger.error(f'Error parsing response: {e}')
-            from time import sleep
-
-            sleep(1)
-            return ([], '')
-
-        # parse the API response into a list of News objects
-        news = [
-            News(
-                title=post['title'],
-                published_at=post['published_at'],
-                source=post['domain'],
-            )
-            for post in response['results']
-        ]
-
-        # extract the next URL from the API response
-        next_url = response['next']
-
-        return news, next_url
-
-
-if __name__ == '__main__':
-    from config import cryptopanic_config
-
-    news_downloader = NewsDownloader(cryptopanic_api_key=cryptopanic_config.api_key)
-    news = news_downloader.get_news()
-    logger.debug(f'Fetched {len(news)} news items')
-    breakpoint()
+            # wait for the next polling
+            sleep(self.polling_interval_sec)
