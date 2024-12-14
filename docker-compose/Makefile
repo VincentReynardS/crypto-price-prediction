@@ -28,6 +28,16 @@ backfill-technical-indicators: build-technical-indicators-historical
 	@echo "Starting backfill with RUN_ID: $(RUN_ID)"
 	RUN_ID=$(RUN_ID) docker compose -f technical-indicators-historical.yml up -d
 
+# News signal pipeline management
+build-news-signal-live:
+	docker compose -f news-signal-live.yml build
+
+start-news-signal-live: build-news-signal-live
+	docker compose -f news-signal-live.yml up -d
+
+stop-news-signal-live:
+	docker compose -f news-signal-live.yml down
+
 clean-backfill-kakfa-topics:
 	@echo "Removing all Kafka topics that contain the word historical"
 	docker compose -f redpanda.yml exec redpanda rpk topic delete -r ".*historical.*"
