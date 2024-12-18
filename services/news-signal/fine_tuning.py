@@ -176,6 +176,7 @@ def fine_tune(
 def run(
     base_llm_name: str,
     dataset_path: str,
+    # comet_ml_api_key: str,
     comet_ml_project_name: str,
     max_seq_length: Optional[int] = 2048,
 ):

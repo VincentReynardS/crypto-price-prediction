@@ -28,21 +28,22 @@ run-with-ollama: build
 
 # To generate a golden dataset with (instruction, input, output) tuples to do
 # Supervised Fine Tuning.
-golden-dataset-with-claude:
+instruction-dataset-with-claude:
 	uv run python golden_dataset.py \
 		--model_provider anthropic \
-		--n 1000 \
-		--output_file ./data/golden_dataset_claude.jsonl
+		--n 10000 \
+		--input_file ./data/cryptopanic_news.csv \
+		--output_file ./data/instruction_dataset_claude_10k.jsonl
 
-golden-dataset-with-ollama:
+instruction-dataset-with-ollama:
 	uv run python golden_dataset.py \
 		--model_provider ollama \
-		--n 1000 \
-		--output_file ./data/golden_dataset_ollama.jsonl
+		--n 10000 \
+		--input_file ./data/cryptopanic_news.csv \
+		--output_file ./data/instruction_dataset_ollama_10k.jsonl
 		
 fine-tune:
 	uv run python fine_tuning.py \
 		--base_llm_name unsloth/Llama-3.2-1B-bnb-4bit \
 		--dataset_path ./data/golden_dataset_ollama.jsonl \
 		--comet_ml_project_name news-signal-extractor
-		
