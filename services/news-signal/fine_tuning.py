@@ -155,7 +155,7 @@ def fine_tune(
             gradient_accumulation_steps=4,
             warmup_steps=5,
             num_train_epochs=1,  # Set this for 1 full training run.
-            max_steps=60,
+            max_steps=120,
             learning_rate=2e-4,
             fp16=not is_bfloat16_supported(),
             bf16=is_bfloat16_supported(),
