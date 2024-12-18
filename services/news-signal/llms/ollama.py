@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 from llama_index.core.prompts import PromptTemplate
 from llama_index.llms.ollama import Ollama
@@ -57,11 +57,18 @@ class OllamaNewsSignalExtractor(BaseNewsSignalExtractor):
         Returns:
             The news signal
         """
-        response: NewsSignal = self.llm.structured_predict(
+        response: List[NewsSignal] = self.llm.structured_predict(
             NewsSignal,
             prompt=self.prompt_template,
             news_story=text,
         )
+
+        # keep only news signals with non-zero signal
+        response = [
+            news_signal
+            for news_signal in response.news_signals
+            if news_signal.signal != 0
+        ]
 
         if output_format == 'dict':
             return response.to_dict()
