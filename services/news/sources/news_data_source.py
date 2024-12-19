@@ -1,8 +1,9 @@
 from time import sleep
 from typing import Optional
 
-from news_downloader import NewsDownloader
 from quixstreams.sources.base import StatefulSource
+
+from .news_downloader import NewsDownloader
 
 
 class NewsDataSource(StatefulSource):
