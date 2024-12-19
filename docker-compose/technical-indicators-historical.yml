@@ -1,5 +1,5 @@
 version: '3.7'
-name: technical-indicators-pipeline-historical
+name: technical-indicators-historical
 networks:
   redpanda_network:
     external: true
@@ -15,7 +15,7 @@ services:
       - KAFKA_BROKER_ADDRESS=redpanda:9092
       - KAFKA_TOPIC=trades_historical_${RUN_ID}
       - PAIRS=["BTC/USD", "BTC/EUR", "ETH/EUR", "ETH/USD", "SOL/USD", "SOL/EUR", "XRP/USD", "XRP/EUR"]
-      - LAST_N_DAYS=30
+      - LAST_N_DAYS=120
       - DATA_SOURCE=historical
     # restart: always
     

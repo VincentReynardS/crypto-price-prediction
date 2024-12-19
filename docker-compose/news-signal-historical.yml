@@ -1,5 +1,5 @@
 version: '3.7'
-name: news-signal-pipeline-historical
+name: news-signal-historical
 networks:
   redpanda_network:
     external: true
@@ -19,8 +19,6 @@ services:
     volumes:
       - ../services/news/data:/app/data
 
-    
-    # restart: always
 
   news-signal:
     build:
