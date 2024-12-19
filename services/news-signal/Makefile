@@ -1,3 +1,8 @@
+########################################
+## Run the service without Docker (for development)
+########################################
+
+
 run-dev-live:
 	cp live.settings.env settings.env
 	uv run python -m run
@@ -5,6 +10,10 @@ run-dev-live:
 run-dev-historical:
 	cp historical.settings.env settings.env
 	uv run python -m run
+
+########################################
+## Build the service for Docker
+########################################
 
 build:
 	docker build -f Dockerfile -t news-signal .
@@ -25,7 +34,10 @@ run-with-ollama: build
 		--env-file ollama.env \
 		news-signal
 
-# LLM specific things
+########################################
+## LLM specific things
+########################################
+
 # Sanity checking each of the LLMs
 run-claude:
 	uv run python -m llms.claude
@@ -33,8 +45,11 @@ run-claude:
 run-ollama:
 	uv run python -m llms.ollama
 
-# Generation of an instruction dataset with tuples (instruction, input, output)
-# to do Supervised Fine Tuning
+########################################
+## Generation of an instruction dataset with tuples (instruction, input, output)
+## to do Supervised Fine Tuning
+########################################
+
 instruction-dataset-with-claude:
 	uv run python golden_dataset.py \
 		--model_provider anthropic \

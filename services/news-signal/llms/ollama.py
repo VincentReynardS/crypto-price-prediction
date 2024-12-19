@@ -82,13 +82,17 @@ if __name__ == '__main__':
     config = OllamaConfig()
 
     llm = OllamaNewsSignalExtractor(
-        model_name=config.model_name,
+        model_name=config.model_name, base_url=config.ollama_base_url
     )
 
     examples = [
         'Bitcoin ETF ads spotted on China’s Alipay payment app',
         'U.S. Supreme Court Lets Nvidia’s Crypto Lawsuit Move Forward',
         'Trump’s World Liberty Acquires ETH, LINK, and AAVE in $12M Crypto Shopping Spree',
+        'Extracting news signal from European crypto ETN and ETP report: Wednesday, June 8',
+        # 'Bitcoin ETF ads spotted on China’s Alipay payment app',
+        # 'U.S. Supreme Court Lets Nvidia’s Crypto Lawsuit Move Forward',
+        # 'Trump’s World Liberty Acquires ETH, LINK, and AAVE in $12M Crypto Shopping Spree',
     ]
 
     for example in examples:
